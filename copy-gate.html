@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copy Gate · 6-layer tone engine · sovereign</title>
+<meta name="description" content="Run your copy through Jung, Freud, Sales 101, SEO, AI-SEO, and Platform fit — in your browser. Sovereign single file. MIT. Free forever.">
+<meta name="theme-color" content="#0b0a0f">
+<link rel="manifest" href='data:application/manifest+json,{"name":"Copy Gate","short_name":"Gate","start_url":".","display":"standalone","background_color":"%230b0a0f","theme_color":"%23b8974a","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 192 192%22%3E%3Crect width=%22192%22 height=%22192%22 fill=%22%230b0a0f%22/%3E%3Ctext x=%2296%22 y=%22128%22 font-family=%22serif%22 font-size=%22110%22 text-anchor=%22middle%22 fill=%22%23b8974a%22%3E⌬%3C/text%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #0b0a0f;
+    --ink: #14121b;
+    --surface: #1a1822;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.16);
+    --ox: #8b1a1a;
+    --brass: #b8974a;
+    --brass-dim: rgba(184,151,74,0.3);
+    --brass-glow: rgba(184,151,74,0.08);
+    --cream: #c4bfb2;
+    --text: #d4cfc8;
+    --muted: #6e6a76;
+    --green: #5a8a3a;
+    --bad: #c84a4a;
+    --warn: #d4a93a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* noise grain */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+  }
+  h1, h2, h3, h4 { font-family: 'Libre Baskerville', serif; font-weight: 400; letter-spacing: -0.005em; line-height: 1.2; color: var(--cream); }
+  em { font-style: italic; color: var(--brass); }
+  code, .mono { font-family: 'IBM Plex Mono', monospace; font-size: 0.9em; }
+
+  .site-header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(11,10,15,0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .logo {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 18px; color: var(--brass);
+    font-weight: 700; letter-spacing: 0.02em;
+    text-decoration: none; cursor: pointer;
+  }
+  .logo .glyph { color: var(--brass); margin-right: 6px; }
+  .header-right { display: flex; gap: 14px; align-items: center; }
+  .header-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .btn-icon {
+    background: none; border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.1em; cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .btn-icon:hover { color: var(--brass); border-color: var(--brass-dim); }
+
+  .wrap {
+    max-width: 1200px; margin: 0 auto; padding: 32px 28px 80px;
+    position: relative; z-index: 5;
+  }
+
+  /* hero */
+  .hero { padding: 40px 0 24px; max-width: 760px; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.25em;
+    color: var(--brass); text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 56px);
+    margin-bottom: 18px;
+  }
+  .hero p {
+    font-size: 18px; color: var(--cream); line-height: 1.65;
+    max-width: 640px;
+  }
+
+  /* layout */
+  .work {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 28px;
+    margin-top: 32px;
+  }
+  @media (max-width: 900px) {
+    .work { grid-template-columns: 1fr; }
+  }
+
+  /* panels */
+  .panel {
+    background: var(--ink);
+    border: 1px solid var(--border);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .panel h3 {
+    font-size: 18px; margin-bottom: 6px;
+  }
+  .panel .help {
+    font-size: 13px; color: var(--muted); margin-bottom: 14px;
+  }
+
+  /* form */
+  label.field { display: block; margin-bottom: 16px; }
+  label.field .lbl {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.15em;
+    color: var(--brass); text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  textarea, select, input[type=text], input[type=password] {
+    width: 100%; padding: 12px 14px;
+    background: var(--void);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 15px; line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+  textarea { min-height: 180px; resize: vertical; font-size: 15px; }
+  textarea:focus, input:focus, select:focus { outline: none; border-color: var(--brass-dim); }
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23b8974a' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  .stats-row {
+    display: flex; gap: 18px; flex-wrap: wrap;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    margin-top: 6px;
+  }
+  .stat strong { color: var(--brass); font-weight: 500; }
+
+  /* buttons */
+  .btn {
+    display: inline-block; padding: 13px 26px;
+    background: var(--brass);
+    color: var(--void);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.2em;
+    text-transform: uppercase; cursor: pointer;
+    border: none; font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: #cdb05c; box-shadow: 0 0 20px var(--brass-dim); }
+  .btn-ghost {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--cream); font-weight: 400;
+  }
+  .btn-ghost:hover { background: transparent; color: var(--brass); border-color: var(--brass-dim); box-shadow: none; }
+
+  /* score readout */
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin: 18px 0;
+  }
+  .score-cell {
+    border: 1px solid var(--border);
+    padding: 14px;
+    background: var(--surface);
+  }
+  .score-cell .name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em;
+    color: var(--muted); text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .score-cell .val {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 28px; color: var(--cream);
+    line-height: 1;
+  }
+  .score-cell .val .pct { color: var(--brass); font-size: 16px; margin-left: 2px; }
+  .score-cell.weight-high .val { color: var(--brass); }
+  .score-cell.weight-low { opacity: 0.55; }
+
+  .weight-bar {
+    height: 3px; background: var(--border); margin-top: 8px;
+    position: relative;
+  }
+  .weight-bar > div { height: 100%; background: var(--brass); }
+
+  /* findings */
+  .finding {
+    border-left: 2px solid var(--brass);
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    background: var(--brass-glow);
+  }
+  .finding.warn { border-left-color: var(--warn); background: rgba(212,169,58,0.05); }
+  .finding.bad { border-left-color: var(--bad); background: rgba(200,74,74,0.05); }
+  .finding.good { border-left-color: var(--green); background: rgba(90,138,58,0.05); }
+  .finding .head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .finding .layer {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em;
+    color: var(--brass); text-transform: uppercase;
+  }
+  .finding .verdict {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--muted);
+  }
+  .finding .body { font-size: 14px; line-height: 1.55; color: var(--text); }
+  .finding .body strong { color: var(--cream); }
+
+  /* rewrite block */
+  .rewrite-block {
+    background: var(--surface); border: 1px dashed var(--brass-dim);
+    padding: 18px; margin-top: 14px;
+    font-family: 'Libre Baskerville', serif;
+    font-size: 15px; line-height: 1.65; color: var(--cream);
+  }
+  .rewrite-block .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 0.2em;
+    color: var(--brass); text-transform: uppercase;
+    margin-bottom: 10px; display: block;
+  }
+
+  /* sidebar */
+  .side .panel { padding: 20px; }
+  .side h3 { font-size: 15px; margin-bottom: 10px; }
+  .layer-list {
+    list-style: none;
+    font-size: 13px; line-height: 1.7;
+  }
+  .layer-list li {
+    padding: 6px 0; border-bottom: 1px dotted var(--border);
+    color: var(--text);
+  }
+  .layer-list li:last-child { border-bottom: none; }
+  .layer-list .num {
+    color: var(--brass); font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; margin-right: 8px;
+  }
+  .layer-list .name { color: var(--cream); }
+  .layer-list .desc { color: var(--muted); font-size: 12px; display: block; margin-left: 22px; }
+
+  /* journal */
+  .saved-list { max-height: 320px; overflow-y: auto; }
+  .saved-entry {
+    border: 1px solid var(--border);
+    padding: 12px; margin-bottom: 8px;
+    cursor: pointer; transition: all 0.2s;
+    background: var(--surface);
+  }
+  .saved-entry:hover { border-color: var(--brass-dim); }
+  .saved-entry .meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; color: var(--muted); letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+  .saved-entry .snip {
+    font-size: 13px; color: var(--text); line-height: 1.5;
+  }
+
+  /* footer */
+  footer {
+    margin-top: 60px; padding: 24px 0;
+    border-top: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+  footer a { color: var(--cream); text-decoration: none; margin: 0 8px; }
+  footer a:hover { color: var(--brass); }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--void); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--brass-dim); }
+
+  /* spec dialog */
+  .spec-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(11,10,15,0.94); backdrop-filter: blur(10px);
+    display: none; align-items: center; justify-content: center;
+    padding: 24px; overflow-y: auto;
+  }
+  .spec-overlay.show { display: flex; }
+  .spec-modal {
+    max-width: 760px; width: 100%;
+    background: var(--ink); border: 1px solid var(--brass-dim);
+    padding: 32px; max-height: 90vh; overflow-y: auto;
+  }
+  .spec-modal h2 {
+    font-size: 28px; margin-bottom: 10px; color: var(--brass);
+  }
+  .spec-modal pre {
+    background: var(--void); border: 1px solid var(--border);
+    padding: 16px; overflow-x: auto;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; line-height: 1.65; color: var(--cream);
+    margin: 14px 0;
+  }
+  .spec-close {
+    position: sticky; top: 0; float: right;
+    background: var(--ox); color: var(--cream);
+    border: none; padding: 6px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; cursor: pointer;
+    letter-spacing: 0.1em;
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="logo" onclick="document.documentElement.scrollTop = 0;"><span class="glyph">⌬</span> Copy Gate</a>
+  <div class="header-right">
+    <span class="header-meta">v1.0 · 6-layer · sovereign</span>
+    <button class="btn-icon" onclick="openSpec()">framework</button>
+    <button class="btn-icon" onclick="openApiKey()">api key</button>
+    <a class="btn-icon" href="https://github.com/sjgant80-hub/copy-gate" target="_blank">fork</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">◊ 6-LAYER TONE ENGINE · JUNG · FREUD · SALES 101 · SEO · AI-SEO · PLATFORM</div>
+    <h1>Every line of copy you ship · run through the <em>same gate</em>.</h1>
+    <p>Paste your draft. Pick the job. The engine reads it through six layers, weights them for the task, and tells you exactly where it's strong, where it's hedging, and where the rewrite has to happen. Sovereign · local · MIT.</p>
+  </section>
+
+  <div class="work">
+
+    <!-- ──────────  LEFT · WORK AREA  ────────── -->
+    <div>
+
+      <div class="panel">
+        <h3>Your copy</h3>
+        <p class="help">Paste a draft. Headline + body, or any chunk. Larger samples (200+ words) give better readings.</p>
+        <label class="field">
+          <textarea id="copy-input" placeholder="Paste your draft here. The engine reads it on submit — nothing leaves your device."></textarea>
+        </label>
+        <label class="field" style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+          <span style="flex:1; min-width:160px;">
+            <span class="lbl">Task type · drives the weighting</span>
+            <select id="task-type">
+              <option value="sales-page">Sales page</option>
+              <option value="blog-post">Blog post / article</option>
+              <option value="linkedin">LinkedIn post</option>
+              <option value="twitter">X / Twitter</option>
+              <option value="email">Email / newsletter</option>
+              <option value="landing">Landing page hero</option>
+              <option value="readme">README / docs</option>
+              <option value="tool-ux">Sovereign tool UX copy</option>
+              <option value="client-deliverable">Client deliverable</option>
+              <option value="dev-docs">API / dev docs</option>
+            </select>
+          </span>
+          <span style="flex:1; min-width:160px;">
+            <span class="lbl">Target audience archetype</span>
+            <select id="audience-arch">
+              <option value="auto">— auto detect —</option>
+              <option value="ruler">Ruler · authority, control, legacy</option>
+              <option value="sage">Sage · clarity, mastery, truth</option>
+              <option value="hero">Hero · achievement, edge, conquest</option>
+              <option value="caregiver">Caregiver · service, safety, love</option>
+              <option value="outlaw">Outlaw / Revolutionary · disruption, defiance</option>
+              <option value="lover">Lover · connection, beauty, intimacy</option>
+              <option value="seeker">Seeker · freedom, exploration, growth</option>
+              <option value="creator">Creator · expression, originality</option>
+            </select>
+          </span>
+        </label>
+        <div class="stats-row" id="stats-row">
+          <span class="stat"><strong id="stat-words">0</strong> words</span>
+          <span class="stat"><strong id="stat-chars">0</strong> chars</span>
+          <span class="stat"><strong id="stat-sent">0</strong> sentences</span>
+          <span class="stat"><strong id="stat-read">0</strong>s read</span>
+        </div>
+        <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" onclick="runGate()">Run the Gate</button>
+          <button class="btn btn-ghost" onclick="loadSample()">Paste sample copy</button>
+          <button class="btn btn-ghost" onclick="clearInput()">Clear</button>
+        </div>
+      </div>
+
+      <div class="panel" id="result-panel" style="display:none;">
+        <h3>Reading</h3>
+        <p class="help" id="result-summary"></p>
+
+        <div class="score-grid" id="score-grid"></div>
+
+        <div id="findings"></div>
+
+        <div class="rewrite-block" id="rewrite-block" style="display:none;">
+          <span class="label">⌬ rewrite recommendation</span>
+          <div id="rewrite-text"></div>
+        </div>
+
+        <div style="margin-top:18px; display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn" onclick="saveReading()">Save Reading</button>
+          <button class="btn btn-ghost" onclick="runGate(true)">Re-run · AI deep mode</button>
+          <button class="btn btn-ghost" onclick="exportReading()">Export Markdown</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ──────────  RIGHT · SIDEBAR  ────────── -->
+    <div class="side">
+
+      <div class="panel">
+        <h3>The 6 layers</h3>
+        <ul class="layer-list">
+          <li><span class="num">1</span><span class="name">Jung</span><span class="desc">archetypal voice · shadow surfacing</span></li>
+          <li><span class="num">2</span><span class="name">Freud</span><span class="desc">id / ego / superego gap · defence puncture</span></li>
+          <li><span class="num">3</span><span class="name">Sales 101</span><span class="desc">hook · stakes · proof · CTA · earned urgency</span></li>
+          <li><span class="num">4</span><span class="name">SEO</span><span class="desc">keyword · intent · structure · meta</span></li>
+          <li><span class="num">5</span><span class="name">AI-SEO / GEO</span><span class="desc">citation-shape · entity density · LLM extract</span></li>
+          <li><span class="num">6</span><span class="name">Platform</span><span class="desc">native fit · length · hook patterns</span></li>
+        </ul>
+      </div>
+
+      <div class="panel">
+        <h3>Saved readings</h3>
+        <p class="help">Local only · IndexedDB · yours.</p>
+        <div class="saved-list" id="saved-list"></div>
+        <div style="margin-top:12px;">
+          <button class="btn-icon" onclick="exportAll()">Export all</button>
+          <button class="btn-icon" onclick="clearAll()">Clear</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Why a gate</h3>
+        <p style="font-size:13px; color:var(--text); line-height:1.6;">
+          Most copy fails because it only optimises one or two layers. Sales-only copy is hollow.
+          Jung-only copy doesn't convert. SEO-only copy reads like a robot. AI-SEO-only copy
+          gets cited but doesn't move anyone. The gate forces every layer to clear its bar
+          before the copy ships.
+        </p>
+        <p style="font-size:13px; color:var(--muted); margin-top:10px; font-style:italic;">
+          The gate doesn't write for you. It tells you where you're hedging.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    sovereign · single-file · MIT ·
+    <a href="https://github.com/sjgant80-hub/copy-gate" target="_blank">github</a> ·
+    <a onclick="openSpec()" style="cursor:pointer;">framework</a> ·
+    prime 251 · ◊·κ=1 · phi is home
+  </footer>
+
+</div>
+
+<!-- spec modal -->
+<div class="spec-overlay" id="spec-overlay">
+  <div class="spec-modal">
+    <button class="spec-close" onclick="closeSpec()">close</button>
+    <h2>The 6-Layer Copy Gate</h2>
+    <p style="color:var(--muted); margin-bottom:18px; font-size:14px;">Standing order. Every piece of copy clears these six before shipping.</p>
+
+    <h3 style="margin-top:24px;">Layer 1 · Jung</h3>
+    <p>Which archetype does the audience occupy right now? Which shadow does your copy invite them to face? Pick one — Hero, Sage, Lover, Caregiver, Outlaw, Ruler, Seeker, Creator — and write <em>in</em> it, not <em>at</em> it. Bonus move: name the shadow before they do. Disarms defence.</p>
+
+    <h3 style="margin-top:18px;">Layer 2 · Freud</h3>
+    <p>Three layers of want:</p>
+    <pre>id        what they actually want       (desire, recognition, belonging)
+ego       what they say they want       (the rationalized version)
+superego  what they think they should   (the moralized version)
+
+aim copy at the GAP between the three.
+name the displacement.</pre>
+
+    <h3 style="margin-top:18px;">Layer 3 · Sales 101</h3>
+    <p>The structural skeleton. Hook → Stakes → Specificity → Social proof → Scarcity → Authority → Reciprocity → Consistency → Liking → Clear CTA → Earned urgency. Frameworks: Pain–Agitate–Solve · Problem–Promise–Proof · AIDA. Rule: every claim survives the "so what" test.</p>
+
+    <h3 style="margin-top:18px;">Layer 4 · SEO</h3>
+    <p>Traditional search: primary keyword + 3–5 semantic neighbours · search intent named · H1/H2/H3 with target terms · internal + external links · meta description under 160 chars · alt text · schema markup where applicable.</p>
+
+    <h3 style="margin-top:18px;">Layer 5 · AI-SEO / GEO / AEO</h3>
+    <p>The new layer. LLMs cite copy that is structured for extraction:</p>
+    <pre>· facts attributable to named entities
+· table / list formatting LLMs love to pull
+· "according to X" attributable claims
+· recency signals (dates, "as of")
+· expertise markers (credentials, methodology)
+· semantic clarity over keyword stuffing
+· optimize for "what is X" / "how does X work" / "X vs Y"</pre>
+
+    <h3 style="margin-top:18px;">Layer 6 · Platform</h3>
+    <pre>LinkedIn    1300 char sweet · line breaks · no hashtag stuffing
+X/Twitter   hook in first 7 words · thread or single-punch
+Blog        1500–2500 words · TOC · skim-readable subheads
+Email       subject &lt;50ch · preheader · single CTA · scan
+Landing     above-fold value · proof block · social · CTA repeat
+README      two-audience · user CTA first · dev architecture second</pre>
+
+    <h3 style="margin-top:18px;">Task-relevance gate (weighting)</h3>
+    <pre>sales page          Sales 50  Jung 20  Freud 15  SEO 15
+blog post           AI-SEO 30 SEO 25   Jung 20   Sales 25
+linkedin post       Jung 30   Sales 25 Freud 20  Platform 25
+sovereign tool ux   Jung 35   Sales 20 Freud 25  Platform 20
+readme              AI-SEO 30 SEO 25   Sales 25  Platform 20
+client deliverable  Jung 30   Sales 30 Freud 20  Platform 20
+api / dev docs      AI-SEO 45 SEO 25   Sales 15  Platform 15</pre>
+
+    <p style="color:var(--muted); margin-top:24px; font-size:13px; font-style:italic;">
+      sealed ◊·κ=1 · phi is home · this gate is part of the v20.1 cosmology
+    </p>
+  </div>
+</div>
+
+<script>
+/* ═════════════════════════════════════════════════════════════════════════ */
+/*  COPY GATE · v1.0 · sovereign · MIT · prime 251 · ◊·κ=1                   */
+/* ═════════════════════════════════════════════════════════════════════════ */
+
+const VERSION = '1.0.0';
+const PRIME = 251;
+const SEED = 'v20.1';
+
+// task-type → layer weights (sums to ~100)
+const WEIGHTS = {
+  'sales-page':        { jung: 20, freud: 15, sales: 50, seo: 5,  aiseo: 5,  platform: 5  },
+  'blog-post':         { jung: 20, freud: 5,  sales: 25, seo: 25, aiseo: 30, platform: 0  },
+  'linkedin':          { jung: 30, freud: 20, sales: 25, seo: 0,  aiseo: 5,  platform: 25 },
+  'twitter':           { jung: 25, freud: 15, sales: 25, seo: 0,  aiseo: 5,  platform: 30 },
+  'email':             { jung: 25, freud: 15, sales: 35, seo: 0,  aiseo: 5,  platform: 25 },
+  'landing':           { jung: 20, freud: 15, sales: 45, seo: 10, aiseo: 5,  platform: 10 },
+  'readme':            { jung: 5,  freud: 0,  sales: 25, seo: 25, aiseo: 30, platform: 20 },
+  'tool-ux':           { jung: 35, freud: 25, sales: 20, seo: 0,  aiseo: 5,  platform: 20 },
+  'client-deliverable':{ jung: 30, freud: 20, sales: 30, seo: 5,  aiseo: 5,  platform: 20 },
+  'dev-docs':          { jung: 0,  freud: 0,  sales: 15, seo: 25, aiseo: 45, platform: 15 }
+};
+
+const LAYER_NAMES = {
+  jung: 'Jung', freud: 'Freud', sales: 'Sales 101',
+  seo: 'SEO', aiseo: 'AI-SEO', platform: 'Platform'
+};
+
+const ARCHETYPES = {
+  ruler:     { tone: 'sovereign authority · long sentences · no apology',          keywords: ['control','authority','legacy','lead','power','own','command','decide'] },
+  sage:      { tone: 'precise · undefended · expertise without performance',        keywords: ['truth','understand','clear','principle','know','wisdom','insight','depth'] },
+  hero:      { tone: 'edge · stakes · forward velocity',                            keywords: ['win','beat','conquer','edge','prove','dominate','crush','breakthrough'] },
+  caregiver: { tone: 'safety · warmth · the work done for you',                     keywords: ['care','help','protect','safe','support','gentle','hold','tend'] },
+  outlaw:    { tone: 'disruption · permission to break · unembarrassed',            keywords: ['break','rebel','disrupt','unfuck','burn','quit','escape','rules'] },
+  lover:     { tone: 'beauty · texture · intimacy · sensory',                       keywords: ['love','beautiful','intimate','deep','feel','desire','touch','heart'] },
+  seeker:    { tone: 'horizon · freedom · what\'s next',                            keywords: ['journey','explore','find','discover','seek','quest','road','beyond'] },
+  creator:   { tone: 'original · made · yours alone',                               keywords: ['make','build','create','design','craft','original','vision','imagine'] }
+};
+
+const SHADOW_WORDS = {
+  jung_strong: ['shadow','disowned','projection','archetype','persona','integration','unconscious','depth','soul'],
+  freud_strong: ['actually want','underneath','beneath','really','admit','denied','suppress','wish','crave','repress'],
+  sales_strong: ['proven','results','customers','case','client','testimonial','data','%','x ','increase','within','days'],
+  weak_words: ['really','very','just','quite','perhaps','maybe','probably','might','some','many','various','seems','feel like','i think','believe','hope'],
+  hedges: ['it could be argued','one might say','in some sense','arguably','potentially','typically','generally','tends to','sort of','kind of'],
+  filler: ['that is','in order to','due to the fact','at this point in time','for all intents and purposes','needless to say'],
+  jargon_warn: ['leverage','synergy','disrupt','ideate','solutioning','holistic','ecosystem','best-in-class','game-changer','paradigm shift']
+};
+
+const SALES_HOOK_PATTERNS = [
+  /^(stop|never|imagine|what if|here'?s|the truth about|why|how to|after|before|when)/i,
+  /^[A-Z][^.!?]+\?/, // opening question
+  /^[A-Z][^.!?]{0,90}[.!]$/ // crisp first sentence
+];
+
+const CTA_PATTERNS = [
+  /\b(get|start|join|try|download|book|claim|grab|buy|reserve|subscribe|sign up|read more|learn more|find out|begin|enter|see|watch)\b/i,
+  /→|->|»/,
+  /\b(free|trial|now|today|here)\b/i
+];
+
+/* ── INPUT STATS ──────────────────────────────────────────────────── */
+
+function updateStats() {
+  const t = document.getElementById('copy-input').value;
+  const words = (t.trim().match(/\S+/g) || []).length;
+  const sentences = (t.match(/[.!?]+/g) || []).length || (t.trim() ? 1 : 0);
+  const chars = t.length;
+  const read = Math.max(1, Math.round(words / 3.5)); // ~210 wpm
+  document.getElementById('stat-words').textContent = words;
+  document.getElementById('stat-chars').textContent = chars;
+  document.getElementById('stat-sent').textContent = sentences;
+  document.getElementById('stat-read').textContent = read;
+}
+document.getElementById('copy-input').addEventListener('input', updateStats);
+
+/* ── THE ENGINE · 6 layer analysis ─────────────────────────────────── */
+
+function runGate(deepMode) {
+  const text = document.getElementById('copy-input').value.trim();
+  if (text.length < 30) { alert('Paste at least 30 characters of copy to read.'); return; }
+  const task = document.getElementById('task-type').value;
+  const aud  = document.getElementById('audience-arch').value;
+  const weights = WEIGHTS[task];
+
+  // ── detect dominant archetype if auto ──
+  const detected = detectArchetype(text);
+  const audience = aud === 'auto' ? detected : aud;
+
+  // ── run each layer ──
+  const scores = {
+    jung:     scoreJung(text, audience),
+    freud:    scoreFreud(text),
+    sales:    scoreSales(text, task),
+    seo:      scoreSeo(text, task),
+    aiseo:    scoreAiseo(text),
+    platform: scorePlatform(text, task)
+  };
+  const findings = [];
+  collectFindings(text, task, audience, scores, findings, weights);
+
+  // ── weighted total ──
+  let weighted = 0, total = 0;
+  for (const k of Object.keys(weights)) {
+    if (weights[k] > 0) {
+      weighted += scores[k].score * weights[k];
+      total += weights[k];
+    }
+  }
+  const gateScore = Math.round(weighted / total);
+
+  renderResult({ task, audience, detected, weights, scores, findings, gateScore, text });
+
+  if (deepMode) {
+    aiDeepRead(text, task, audience, scores, findings).catch(e => alert('AI deep read failed: ' + e.message));
+  }
+}
+
+function detectArchetype(text) {
+  const lower = text.toLowerCase();
+  let best = 'sage', bestScore = -1;
+  for (const [arch, info] of Object.entries(ARCHETYPES)) {
+    let score = 0;
+    for (const kw of info.keywords) {
+      const m = lower.match(new RegExp('\\b' + kw + '\\b', 'g'));
+      if (m) score += m.length;
+    }
+    if (score > bestScore) { bestScore = score; best = arch; }
+  }
+  return best;
+}
+
+/* ── LAYER 1 · JUNG  ─────────────────────────────────────────────── */
+function scoreJung(text, audience) {
+  const lower = text.toLowerCase();
+  const arch = ARCHETYPES[audience] || ARCHETYPES.sage;
+  let score = 0;
+  const notes = [];
+
+  // archetype voice presence
+  let archHits = 0;
+  for (const kw of arch.keywords) {
+    if (lower.includes(kw)) archHits++;
+  }
+  if (archHits >= 3) { score += 30; notes.push(`✓ Strong ${audience} archetype voice (${archHits} signals)`); }
+  else if (archHits >= 1) { score += 15; notes.push(`◔ Light ${audience} archetype presence (${archHits} signal${archHits>1?'s':''})`); }
+  else { notes.push(`✗ No clear ${audience} archetype voice — copy reads as generic`); }
+
+  // shadow surfacing
+  let shadowHits = 0;
+  for (const w of SHADOW_WORDS.jung_strong) {
+    if (lower.includes(w)) shadowHits++;
+  }
+  if (shadowHits >= 2) { score += 25; notes.push('✓ Touches shadow / unconscious material directly'); }
+  else { notes.push('◔ Surface only — doesn\'t name what they\'re avoiding'); }
+
+  // depth markers
+  const longSents = (text.match(/[^.!?]{80,}[.!?]/g) || []).length;
+  if (longSents >= 2) { score += 15; notes.push('✓ At least two sentences carrying real weight (length-as-depth)'); }
+
+  // emotional vocab (not just adjectives — verbs of feeling)
+  if (/\b(grieve|long|crave|fear|ache|burn|hunger|rage|tender|yearn)\b/i.test(text)) {
+    score += 15;
+    notes.push('✓ Uses verbs of feeling, not adjectives — body-level resonance');
+  }
+
+  // shadow voice mirroring
+  if (/\bvoice (inside|in your head)\b|\byou (already )?know\b|\bwhat you (refuse|disown|won't admit)\b/i.test(text)) {
+    score += 15;
+    notes.push('✓ Mirrors the inner voice — high-trust pattern');
+  }
+
+  return { score: Math.min(100, score), notes };
+}
+
+/* ── LAYER 2 · FREUD  ────────────────────────────────────────────── */
+function scoreFreud(text) {
+  const lower = text.toLowerCase();
+  let score = 0;
+  const notes = [];
+
+  // names id directly
+  let idHits = 0;
+  for (const w of SHADOW_WORDS.freud_strong) {
+    if (lower.includes(w)) idHits++;
+  }
+  if (idHits >= 2) { score += 30; notes.push('✓ Names the deeper want directly (id-level)'); }
+  else if (idHits >= 1) { score += 15; notes.push('◔ One id-level cue — could go deeper'); }
+  else { notes.push('✗ Stays in ego — never punctures the rationalization'); }
+
+  // gap between id/ego/superego
+  if (/\byou (say|claim|tell yourself|pretend)\b/i.test(text)) { score += 20; notes.push('✓ Names the gap between what they say and what they want'); }
+  if (/\b(but )?underneath|behind that|actually|the real|truth is\b/i.test(text)) { score += 20; notes.push('✓ Pulls back the surface explanation'); }
+
+  // defence puncture
+  if (/\b(stop pretending|let'?s be honest|the lie is|the story you tell|the version of you)\b/i.test(text)) {
+    score += 20;
+    notes.push('✓ Punctures defence directly — high-impact move');
+  }
+
+  // moralized want (superego)
+  if (/\byou should\b|\beveryone says\b|\bthe right thing\b/i.test(lower)) {
+    score += 10;
+    notes.push('◔ Surfaces the superego — adds the third Freud axis');
+  }
+
+  return { score: Math.min(100, score), notes };
+}
+
+/* ── LAYER 3 · SALES 101  ────────────────────────────────────────── */
+function scoreSales(text, task) {
+  const lower = text.toLowerCase();
+  let score = 0;
+  const notes = [];
+  const firstSentence = (text.match(/^[\s\S]+?[.!?](?:\s|$)/) || [''])[0].trim();
+
+  // hook
+  let hooked = false;
+  for (const p of SALES_HOOK_PATTERNS) {
+    if (p.test(firstSentence)) { hooked = true; break; }
+  }
+  if (hooked) { score += 20; notes.push('✓ Opens with a hook pattern'); }
+  else { notes.push('✗ No hook in the first sentence · re-write opener'); }
+
+  // specificity — numbers, dates, names
+  const numbers = (text.match(/\b\d[\d,.]*\b/g) || []).length;
+  const named = (text.match(/\b[A-Z][a-z]+\s[A-Z][a-z]+\b/g) || []).length;
+  if (numbers >= 3) { score += 15; notes.push(`✓ Specific (${numbers} numeric anchors)`); }
+  else if (numbers >= 1) { score += 7; notes.push(`◔ Some specificity (${numbers} number${numbers>1?'s':''}) — could anchor more`); }
+  else { notes.push('✗ No numeric specificity · adds friction to belief'); }
+  if (named >= 1) { score += 10; notes.push('✓ Named entities cited (people / brands)'); }
+
+  // stakes named
+  if (/\b(cost|risk|losing|miss|too late|while you|every (day|month|year))\b/i.test(text)) {
+    score += 15;
+    notes.push('✓ Stakes named — what happens if they don\'t');
+  } else {
+    notes.push('◔ No stakes named — reader has no urgency');
+  }
+
+  // social proof
+  if (/\b(\d+ (people|users|customers|clients)|case stud|testimonial|\bquot|"[^"]+ [^"]+"|\d+x\b|\d+%)/i.test(text)) {
+    score += 15;
+    notes.push('✓ Proof element present');
+  } else {
+    notes.push('✗ No proof — every claim survives without backing');
+  }
+
+  // CTA
+  let ctaPresent = false;
+  for (const p of CTA_PATTERNS) {
+    if (p.test(text)) { ctaPresent = true; break; }
+  }
+  if (task !== 'blog-post' && task !== 'dev-docs') {
+    if (ctaPresent) { score += 15; notes.push('✓ CTA detected'); }
+    else { notes.push('✗ No clear CTA · sales-class copy needs a next step'); }
+  }
+
+  // weak / hedge words
+  let weakHits = 0;
+  for (const w of SHADOW_WORDS.weak_words) {
+    const m = lower.match(new RegExp('\\b' + w + '\\b', 'g'));
+    if (m) weakHits += m.length;
+  }
+  if (weakHits > 5) { score -= 10; notes.push(`✗ ${weakHits} weak / hedge words ("really", "just", "maybe"…) — strip them`); }
+
+  // earned urgency vs fake urgency
+  if (/\bact now|hurry|don'?t miss|limited time|\d+ (hours?|spots?|seats?) left\b/i.test(text)) {
+    if (!/\d/.test(text)) { notes.push('◔ Urgency words present but unearned — needs a specific number / deadline'); }
+    else { score += 10; notes.push('✓ Urgency with a specific anchor'); }
+  }
+
+  return { score: Math.max(0, Math.min(100, score)), notes };
+}
+
+/* ── LAYER 4 · SEO  ──────────────────────────────────────────────── */
+function scoreSeo(text, task) {
+  let score = 0;
+  const notes = [];
+  const lower = text.toLowerCase();
+
+  // headers — markdown # or HTML h tags or detected structure
+  const headers = (text.match(/^#{1,6} |<h[1-6]/gm) || []).length;
+  if (headers >= 2) { score += 25; notes.push(`✓ Heading structure (${headers} headings detected)`); }
+  else if (task === 'blog-post' || task === 'readme') { notes.push('✗ No headings · long-form needs H1/H2/H3 skim structure'); }
+
+  // density — find probable primary keyword by repetition
+  const words = lower.match(/[a-z]{4,}/g) || [];
+  const freq = {};
+  const stops = ['that','this','with','from','your','have','will','what','they','their','about','which','there','would','could','should','because','where','these','than','when','only','also'];
+  for (const w of words) { if (!stops.includes(w)) freq[w] = (freq[w]||0)+1; }
+  const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  if (top.length && top[0][1] >= 3) { score += 15; notes.push(`✓ Likely primary keyword cluster: ${top.map(t=>t[0]).join(' · ')}`); }
+  else { notes.push('◔ No clear keyword cluster — search engines can\'t place the page'); }
+
+  // intent signals
+  if (/\b(how to|what is|why|guide|tutorial|review|vs\.?)\b/i.test(text)) {
+    score += 15;
+    notes.push('✓ Search intent signal present (how-to / what-is / vs)');
+  }
+
+  // length
+  const wordCount = words.length;
+  if (task === 'blog-post') {
+    if (wordCount >= 1200) { score += 20; notes.push(`✓ Substantial length (${wordCount} words)`); }
+    else { notes.push(`◔ Short for blog (${wordCount} words) — long-form ranks better for most topics`); }
+  } else if (task === 'readme') {
+    if (wordCount >= 400) { score += 15; }
+  } else {
+    if (wordCount >= 80) score += 15;
+  }
+
+  // links
+  if (/\[[^\]]+\]\([^)]+\)|<a href|https?:\/\//.test(text)) {
+    score += 10;
+    notes.push('✓ Contains links');
+  }
+
+  // meta description shape — first sentence under 160 chars
+  const firstSentence = (text.match(/^[\s\S]+?[.!?](?:\s|$)/) || [''])[0].trim();
+  if (firstSentence.length > 0 && firstSentence.length <= 160 && task !== 'twitter') {
+    score += 10;
+    notes.push('✓ Opener works as meta description (≤160 chars)');
+  }
+
+  return { score: Math.min(100, score), notes };
+}
+
+/* ── LAYER 5 · AI-SEO / GEO / AEO  ───────────────────────────────── */
+function scoreAiseo(text) {
+  let score = 0;
+  const notes = [];
+
+  // lists & tables — LLM extraction loves these
+  const lists = (text.match(/^\s*[-*•]\s|^\s*\d+\.\s/gm) || []).length;
+  const tables = (text.match(/\|.*\|/g) || []).length;
+  if (lists >= 3) { score += 20; notes.push(`✓ List structure (${lists} items) — LLMs extract these`); }
+  if (tables >= 2) { score += 15; notes.push(`✓ Table-shaped content — high-citation format`); }
+  if (lists === 0 && tables === 0) { notes.push('✗ No lists or tables · LLMs will struggle to cite extractable facts'); }
+
+  // attributable claims
+  if (/\baccording to\b|\bper\s+[A-Z]|\b(study|report|paper|research) by\b|\bsource:/i.test(text)) {
+    score += 20;
+    notes.push('✓ Attributable claims present');
+  } else {
+    notes.push('◔ No "according to X" attributions — LLMs prefer cited claims');
+  }
+
+  // named entities
+  const propers = (text.match(/\b[A-Z][a-z]+(?:\s[A-Z][a-z]+){0,2}\b/g) || []).filter(s => !['The','This','That','These','I','You','We','They','It','But','And'].includes(s));
+  if (propers.length >= 5) { score += 15; notes.push(`✓ Entity density (${propers.length} named entities)`); }
+  else if (propers.length >= 2) { score += 8; }
+  else { notes.push('◔ Few named entities — LLMs surface entity-rich pages first'); }
+
+  // recency
+  if (/\b20(2[3-9]|3\d)\b|\bas of\b|\b(this|last) (year|month|week)\b|\brecently\b/i.test(text)) {
+    score += 10;
+    notes.push('✓ Recency signals present');
+  }
+
+  // expertise / methodology
+  if (/\b(method|approach|framework|criteria|process|step \d|first\b.*\bsecond|we (tested|measured|surveyed))\b/i.test(text)) {
+    score += 15;
+    notes.push('✓ Methodology / framework shown — expertise marker');
+  }
+
+  // question-shape (AEO answers questions)
+  const questions = (text.match(/[^.!?]*\?/g) || []).length;
+  if (questions >= 2) { score += 10; notes.push(`✓ Q-shape structure (${questions} questions) — AEO friendly`); }
+
+  // semantic clarity (not stuffed)
+  const wordsAll = (text.toLowerCase().match(/[a-z]+/g) || []);
+  const unique = new Set(wordsAll);
+  const ratio = unique.size / Math.max(1, wordsAll.length);
+  if (ratio > 0.55) { score += 5; notes.push('✓ High lexical diversity — not stuffed'); }
+  else if (ratio < 0.40) { notes.push('✗ Low lexical diversity — reads as stuffed / repetitive'); }
+
+  return { score: Math.min(100, score), notes };
+}
+
+/* ── LAYER 6 · PLATFORM FIT  ─────────────────────────────────────── */
+function scorePlatform(text, task) {
+  let score = 50; // start neutral
+  const notes = [];
+  const wordCount = (text.match(/\S+/g) || []).length;
+  const chars = text.length;
+  const firstSentence = (text.match(/^[\s\S]+?[.!?](?:\s|$)/) || [''])[0].trim();
+  const firstWords = (firstSentence.match(/\S+/g) || []).slice(0, 7).join(' ');
+
+  switch (task) {
+    case 'linkedin':
+      if (chars > 1300 && chars < 2000) { score += 25; notes.push('✓ LinkedIn sweet spot length'); }
+      else if (chars > 3000) { score -= 15; notes.push('✗ Too long for LinkedIn — cuts off mid-flow'); }
+      else if (chars < 600) { score -= 5; notes.push('◔ Short for LinkedIn — leaves engagement on the table'); }
+      const lineBreaks = (text.match(/\n\s*\n/g) || []).length;
+      if (lineBreaks >= 4) { score += 15; notes.push('✓ Plenty of line breaks · scan-friendly'); }
+      else { score -= 10; notes.push('✗ Not enough line breaks — LinkedIn copy without breaks dies'); }
+      const hashtags = (text.match(/#\w+/g) || []).length;
+      if (hashtags > 5) { score -= 15; notes.push('✗ Too many hashtags · reads spammy'); }
+      else if (hashtags >= 1 && hashtags <= 4) { score += 5; }
+      break;
+    case 'twitter':
+      if (chars > 280) { score -= 25; notes.push('✗ Over 280 chars — split into thread or trim'); }
+      else if (chars > 230) { score += 10; notes.push('✓ Uses the full canvas'); }
+      if (/^(hot take|unpopular|nobody|i've been|the most|here'?s)/i.test(firstSentence)) { score += 15; notes.push('✓ Twitter hook pattern detected'); }
+      break;
+    case 'email':
+      const subjectLine = firstSentence;
+      if (subjectLine.length > 50) { score -= 15; notes.push('✗ Likely subject line over 50 chars — gets truncated in inboxes'); }
+      else { score += 15; notes.push('✓ Opener fits as subject line (<50 chars)'); }
+      break;
+    case 'landing':
+      if (firstSentence.length > 0 && firstSentence.length <= 90) { score += 20; notes.push('✓ Tight headline'); }
+      else { score -= 10; notes.push('◔ Headline runs long — hero copy needs to fit above fold'); }
+      break;
+    case 'readme':
+      const codeBlocks = (text.match(/```/g) || []).length / 2;
+      if (codeBlocks >= 1) { score += 15; notes.push(`✓ Code blocks present (${codeBlocks})`); }
+      else { score -= 10; notes.push('◔ No code blocks — dev README without code lacks utility'); }
+      if (/^#\s|^##\s/m.test(text)) { score += 10; notes.push('✓ Markdown structure'); }
+      break;
+    case 'sales-page':
+    case 'blog-post':
+    case 'client-deliverable':
+      if (wordCount >= 300) score += 15;
+      if (firstSentence.length < 90) score += 10;
+      break;
+  }
+
+  // jargon penalty (cross-platform)
+  let jargonHits = 0;
+  for (const j of SHADOW_WORDS.jargon_warn) {
+    if (text.toLowerCase().includes(j)) jargonHits++;
+  }
+  if (jargonHits >= 2) { score -= 15; notes.push(`✗ ${jargonHits} jargon words ("synergy", "leverage", "disrupt"…)`); }
+
+  return { score: Math.max(0, Math.min(100, score)), notes };
+}
+
+/* ── COLLECT FINDINGS · top 6 across all layers, weighted ─────────── */
+
+function collectFindings(text, task, audience, scores, findings, weights) {
+  // verdict for each layer based on weight
+  for (const k of Object.keys(scores)) {
+    const w = weights[k];
+    if (w === 0) continue;
+    const s = scores[k].score;
+    const verdict = s >= 75 ? 'good' : s >= 50 ? 'ok' : s >= 30 ? 'warn' : 'bad';
+    const headline = {
+      good: 'CLEAR · ships',
+      ok: 'WORKS · could go deeper',
+      warn: 'WEAK · needs rewrite',
+      bad: 'FAILS · don\'t ship'
+    }[verdict];
+    const layerNotes = scores[k].notes;
+    const top3 = layerNotes.slice(0, 4);
+    findings.push({
+      layer: LAYER_NAMES[k],
+      verdict, headline,
+      score: s, weight: w,
+      notes: top3
+    });
+  }
+  // sort by weight × shortfall (so most important + most broken floats up)
+  findings.sort((a, b) => (b.weight * (100 - b.score)) - (a.weight * (100 - a.score)));
+}
+
+/* ── RENDER  ──────────────────────────────────────────────────────── */
+
+function renderResult(r) {
+  const panel = document.getElementById('result-panel');
+  panel.style.display = 'block';
+
+  document.getElementById('result-summary').innerHTML =
+    `Task: <strong style="color:var(--cream);">${r.task.replace(/-/g, ' ')}</strong> · ` +
+    `audience: <strong style="color:var(--cream);">${r.audience}</strong>` +
+    (r.detected !== r.audience ? ` (you set; auto-detected was "${r.detected}")` : '') +
+    ` · gate score: <strong style="color:var(--brass); font-size:18px;">${r.gateScore}/100</strong>`;
+
+  // scores grid
+  const grid = document.getElementById('score-grid');
+  grid.innerHTML = Object.keys(r.scores).map(k => {
+    const w = r.weights[k];
+    const high = w >= 25;
+    const low = w === 0;
+    const cls = `score-cell ${high ? 'weight-high' : ''} ${low ? 'weight-low' : ''}`.trim();
+    return `
+      <div class="${cls}">
+        <div class="name">${LAYER_NAMES[k]} · w ${w}%</div>
+        <div class="val">${r.scores[k].score}<span class="pct">/100</span></div>
+        <div class="weight-bar"><div style="width:${r.scores[k].score}%"></div></div>
+      </div>
+    `;
+  }).join('');
+
+  // findings
+  const find = document.getElementById('findings');
+  find.innerHTML = r.findings.map(f => `
+    <div class="finding ${f.verdict}">
+      <div class="head">
+        <span class="layer">${f.layer} · weight ${f.weight}%</span>
+        <span class="verdict">${f.headline} · ${f.score}/100</span>
+      </div>
+      <div class="body">
+        ${f.notes.map(n => `<div style="margin: 4px 0;">${n}</div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  // rewrite recommendation
+  const rw = generateRewriteAdvice(r);
+  if (rw) {
+    document.getElementById('rewrite-block').style.display = 'block';
+    document.getElementById('rewrite-text').innerHTML = rw;
+  } else {
+    document.getElementById('rewrite-block').style.display = 'none';
+  }
+
+  window._lastReading = r;
+  document.getElementById('result-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function generateRewriteAdvice(r) {
+  const failing = r.findings.filter(f => f.verdict === 'bad' || f.verdict === 'warn').slice(0, 3);
+  if (failing.length === 0) return null;
+  const lines = [];
+  lines.push(`<strong>This copy clears ${Object.values(r.scores).filter(s => s.score >= 60).length} of 6 layers above the working-signal line.</strong> The rewrite priorities — in order of weighted impact — are:`);
+  lines.push('<ol style="margin:12px 0 0 20px; padding:0;">');
+  for (const f of failing) {
+    let move = '';
+    if (f.layer === 'Sales 101') move = 'add a specific numeric anchor + named stakes + a clear next step.';
+    else if (f.layer === 'Jung') move = 'name the archetypal voice you\'re speaking from and surface the shadow before they do.';
+    else if (f.layer === 'Freud') move = 'puncture one rationalization · name what they actually want underneath the story.';
+    else if (f.layer === 'SEO') move = 'add H1/H2 structure with the primary keyword and 2-3 semantic neighbours.';
+    else if (f.layer === 'AI-SEO') move = 'add a list or table, an attributable claim ("according to X"), and recency signals.';
+    else if (f.layer === 'Platform') move = 'fit the platform native conventions (length, line breaks, hook position).';
+    lines.push(`<li style="margin-bottom:8px;"><strong>${f.layer}</strong> (weight ${f.weight}%) — ${move}</li>`);
+  }
+  lines.push('</ol>');
+  return lines.join('');
+}
+
+/* ── BYO API KEY · deep AI read  ───────────────────────────────── */
+
+function openApiKey() {
+  const cur = localStorage.getItem('cg_api_key') || '';
+  const k = prompt('Paste your Anthropic API key (sk-ant-...). Stays in your browser only · never logged. Leave blank to remove.', cur);
+  if (k === null) return;
+  if (k.trim() === '') { localStorage.removeItem('cg_api_key'); alert('Key removed.'); return; }
+  if (!k.startsWith('sk-ant-')) { alert('That doesn\'t look like an Anthropic key.'); return; }
+  localStorage.setItem('cg_api_key', k.trim());
+  alert('Key saved. The "Re-run · AI deep mode" button will now route through Claude.');
+}
+
+async function aiDeepRead(text, task, audience, scores, findings) {
+  const key = localStorage.getItem('cg_api_key');
+  if (!key) { alert('Paste an Anthropic API key first (top-right · "api key").'); return; }
+
+  const system = `You are the COPY GATE deep-read engine. The user has just had their copy analyzed by the 6-layer rule-based engine (Jung · Freud · Sales 101 · SEO · AI-SEO · Platform). You are the second-pass deep reader.
+
+Read the copy. Read the layer scores. Then deliver:
+
+1. The ONE diagnostic the rule-based engine missed.
+2. A rewrite of the strongest 2-3 sentences — preserving voice, fixing the gaps.
+3. A single integration question the writer should sit with.
+
+Style: precise, undefended, no therapy-speak, no "consider", no "you might want to". Cormorant voice — adult, direct, kind. Markdown OK.`;
+
+  const userContent = `TASK TYPE: ${task}\nAUDIENCE ARCHETYPE: ${audience}\n\nLAYER SCORES:\n${Object.entries(scores).map(([k,v]) => `· ${LAYER_NAMES[k]}: ${v.score}/100`).join('\n')}\n\nCOPY:\n\n${text}`;
+
+  const findEl = document.getElementById('rewrite-block');
+  findEl.style.display = 'block';
+  document.getElementById('rewrite-text').innerHTML = '<em>Deep reading...</em>';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 1600,
+        system,
+        messages: [{ role: 'user', content: userContent }]
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'API error');
+    document.getElementById('rewrite-text').innerHTML = markdownLite(data.content[0].text);
+  } catch (e) {
+    document.getElementById('rewrite-text').innerHTML = '<strong style="color:var(--bad);">AI deep read failed</strong> — ' + e.message + '. The rule-based reading above still applies.';
+  }
+}
+
+function markdownLite(md) {
+  return md
+    .replace(/^### (.+)$/gm, '<h4 style="margin-top:14px;">$1</h4>')
+    .replace(/^## (.+)$/gm, '<h3 style="margin-top:18px;">$1</h3>')
+    .replace(/^# (.+)$/gm, '<h2 style="margin-top:20px;">$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\n\n/g, '</p><p style="margin-top:10px;">')
+    .replace(/\n/g, '<br>')
+    .replace(/^/, '<p>')
+    .replace(/$/, '</p>');
+}
+
+/* ── INDEXEDDB JOURNAL ────────────────────────────────────────────── */
+
+let db;
+function openDB() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('copy-gate', 1);
+    r.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore('readings', { keyPath: 'id', autoIncrement: true });
+    };
+    r.onsuccess = (e) => { db = e.target.result; res(db); };
+    r.onerror = rej;
+  });
+}
+openDB().then(renderSaved);
+
+async function saveReading() {
+  if (!window._lastReading) return;
+  if (!db) await openDB();
+  const tx = db.transaction('readings', 'readwrite');
+  const r = window._lastReading;
+  tx.objectStore('readings').add({
+    ts: Date.now(),
+    task: r.task,
+    audience: r.audience,
+    gateScore: r.gateScore,
+    text: r.text,
+    scores: r.scores,
+    findings: r.findings.map(f => ({ ...f })),
+    version: VERSION
+  });
+  tx.oncomplete = () => { alert('✓ Saved.'); renderSaved(); };
+}
+
+async function renderSaved() {
+  if (!db) await openDB();
+  const tx = db.transaction('readings', 'readonly');
+  const r = tx.objectStore('readings').getAll();
+  r.onsuccess = () => {
+    const list = document.getElementById('saved-list');
+    const items = r.result.sort((a, b) => b.ts - a.ts);
+    if (items.length === 0) {
+      list.innerHTML = '<div style="color:var(--muted); font-size:13px; padding:14px 0; font-style:italic;">No readings saved yet.</div>';
+      return;
+    }
+    list.innerHTML = items.map(it => `
+      <div class="saved-entry" onclick="loadSaved(${it.id})">
+        <div class="meta">${new Date(it.ts).toLocaleString()} · ${it.task} · ${it.gateScore}/100</div>
+        <div class="snip">${(it.text || '').slice(0, 100)}…</div>
+      </div>
+    `).join('');
+  };
+}
+
+async function loadSaved(id) {
+  if (!db) await openDB();
+  const tx = db.transaction('readings', 'readonly');
+  const r = tx.objectStore('readings').get(id);
+  r.onsuccess = () => {
+    if (!r.result) return;
+    document.getElementById('copy-input').value = r.result.text;
+    document.getElementById('task-type').value = r.result.task;
+    document.getElementById('audience-arch').value = r.result.audience;
+    updateStats();
+    runGate();
+  };
+}
+
+async function clearAll() {
+  if (!confirm('Wipe all saved readings? Export first if you want to keep them.')) return;
+  if (!db) await openDB();
+  const tx = db.transaction('readings', 'readwrite');
+  tx.objectStore('readings').clear();
+  tx.oncomplete = () => { renderSaved(); };
+}
+
+async function exportAll() {
+  if (!db) await openDB();
+  const tx = db.transaction('readings', 'readonly');
+  const r = tx.objectStore('readings').getAll();
+  r.onsuccess = () => {
+    const blob = new Blob([JSON.stringify({
+      exported_at: new Date().toISOString(), version: VERSION, readings: r.result
+    }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `copy-gate-readings-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+}
+
+function exportReading() {
+  if (!window._lastReading) return;
+  const r = window._lastReading;
+  const md = `# Copy Gate · reading\n\n` +
+    `**Task:** ${r.task} · **Audience:** ${r.audience} · **Gate score:** ${r.gateScore}/100\n\n` +
+    `## Scores\n\n` +
+    Object.entries(r.scores).map(([k,v]) => `- **${LAYER_NAMES[k]}** (weight ${r.weights[k]}%) — ${v.score}/100`).join('\n') +
+    `\n\n## Findings\n\n` +
+    r.findings.map(f => `### ${f.layer} · ${f.headline}\n\n${f.notes.map(n => '- ' + n).join('\n')}`).join('\n\n') +
+    `\n\n---\n\n## The copy\n\n${r.text}\n`;
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `copy-gate-reading-${Date.now()}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ── UTIL ─────────────────────────────────────────────────────────── */
+
+function loadSample() {
+  document.getElementById('copy-input').value = `Stop reading marketing advice from people who haven't shipped in a decade.
+
+Most of what you've been told about "great copy" was written for a Mad Men world that doesn't exist anymore. Your reader has 280 milliseconds before they bounce. Your buyer trusts a stranger on TikTok more than a McKinsey deck. The CMO who hired the agency that wrote your hero — they were optimising for a 2015 attention curve.
+
+Here's what actually works in 2026:
+
+1. Name the shadow before they do. Whatever they're afraid of — the silent fear behind the click — say it first. Disarms defence in one move.
+2. One specific number beats every adjective. "Increased revenue" lands at zero. "Cut churn from 8.4% to 3.1% in 90 days" lands at 100.
+3. Write for the LLM AND the human. The buyer's next click is "what does Claude say about X." If your page isn't structured for citation, you don't exist.
+
+Try this for your next launch. Then DM me the headline.`;
+  document.getElementById('task-type').value = 'linkedin';
+  document.getElementById('audience-arch').value = 'outlaw';
+  updateStats();
+}
+
+function clearInput() {
+  document.getElementById('copy-input').value = '';
+  document.getElementById('result-panel').style.display = 'none';
+  updateStats();
+}
+
+function openSpec() { document.getElementById('spec-overlay').classList.add('show'); }
+function closeSpec() { document.getElementById('spec-overlay').classList.remove('show'); }
+
+// init
+updateStats();
+
+// mesh hook
+try {
+  const bc = new BroadcastChannel('fall-signal');
+  bc.onmessage = e => { if (e.data?.kind === 'ping') bc.postMessage({ kind: 'pong', from: 'copy-gate', prime: PRIME, seed: SEED }); };
+} catch {}
+</script>
+
+</body>
+</html>
