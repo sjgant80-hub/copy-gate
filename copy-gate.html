@@ -549,9 +549,8 @@ api / dev docs      AI-SEO 45 SEO 25   Sales 15  Platform 15</pre>
 /*  COPY GATE · v1.0 · sovereign · MIT · prime 251 · ◊·κ=1                   */
 /* ═════════════════════════════════════════════════════════════════════════ */
 
+/* ==== KERNEL:BEGIN — the six-layer engine; build.mjs copies this block byte-for-byte into kernel.mjs (tested, mutation-gated) and the Agensi skill script ==== */
 const VERSION = '1.0.0';
-const PRIME = 251;
-const SEED = 'v20.1';
 
 // task-type → layer weights (sums to ~100)
 const WEIGHTS = {
@@ -605,62 +604,7 @@ const CTA_PATTERNS = [
   /\b(free|trial|now|today|here)\b/i
 ];
 
-/* ── INPUT STATS ──────────────────────────────────────────────────── */
-
-function updateStats() {
-  const t = document.getElementById('copy-input').value;
-  const words = (t.trim().match(/\S+/g) || []).length;
-  const sentences = (t.match(/[.!?]+/g) || []).length || (t.trim() ? 1 : 0);
-  const chars = t.length;
-  const read = Math.max(1, Math.round(words / 3.5)); // ~210 wpm
-  document.getElementById('stat-words').textContent = words;
-  document.getElementById('stat-chars').textContent = chars;
-  document.getElementById('stat-sent').textContent = sentences;
-  document.getElementById('stat-read').textContent = read;
-}
-document.getElementById('copy-input').addEventListener('input', updateStats);
-
 /* ── THE ENGINE · 6 layer analysis ─────────────────────────────────── */
-
-function runGate(deepMode) {
-  const text = document.getElementById('copy-input').value.trim();
-  if (text.length < 30) { alert('Paste at least 30 characters of copy to read.'); return; }
-  const task = document.getElementById('task-type').value;
-  const aud  = document.getElementById('audience-arch').value;
-  const weights = WEIGHTS[task];
-
-  // ── detect dominant archetype if auto ──
-  const detected = detectArchetype(text);
-  const audience = aud === 'auto' ? detected : aud;
-
-  // ── run each layer ──
-  const scores = {
-    jung:     scoreJung(text, audience),
-    freud:    scoreFreud(text),
-    sales:    scoreSales(text, task),
-    seo:      scoreSeo(text, task),
-    aiseo:    scoreAiseo(text),
-    platform: scorePlatform(text, task)
-  };
-  const findings = [];
-  collectFindings(text, task, audience, scores, findings, weights);
-
-  // ── weighted total ──
-  let weighted = 0, total = 0;
-  for (const k of Object.keys(weights)) {
-    if (weights[k] > 0) {
-      weighted += scores[k].score * weights[k];
-      total += weights[k];
-    }
-  }
-  const gateScore = Math.round(weighted / total);
-
-  renderResult({ task, audience, detected, weights, scores, findings, gateScore, text });
-
-  if (deepMode) {
-    aiDeepRead(text, task, audience, scores, findings).catch(e => alert('AI deep read failed: ' + e.message));
-  }
-}
 
 function detectArchetype(text) {
   const lower = text.toLowerCase();
@@ -1011,6 +955,92 @@ function collectFindings(text, task, audience, scores, findings, weights) {
   findings.sort((a, b) => (b.weight * (100 - b.score)) - (a.weight * (100 - a.score)));
 }
 
+
+/* ── THE GATE · the whole reading, shared by the page and the skill script ── */
+
+// One archetype, six layer scores, the findings and the weighted gate score for a piece of copy.
+function gate(text, task, aud) {
+  const weights = WEIGHTS[task];
+
+  // ── detect dominant archetype if auto ──
+  const detected = detectArchetype(text);
+  const audience = aud === 'auto' ? detected : aud;
+
+  // ── run each layer ──
+  const scores = {
+    jung:     scoreJung(text, audience),
+    freud:    scoreFreud(text),
+    sales:    scoreSales(text, task),
+    seo:      scoreSeo(text, task),
+    aiseo:    scoreAiseo(text),
+    platform: scorePlatform(text, task)
+  };
+  const findings = [];
+  collectFindings(text, task, audience, scores, findings, weights);
+
+  // ── weighted total ──
+  let weighted = 0, total = 0;
+  for (const k of Object.keys(weights)) {
+    if (weights[k] > 0) {
+      weighted += scores[k].score * weights[k];
+      total += weights[k];
+    }
+  }
+  const gateScore = Math.round(weighted / total);
+  return { task, audience, detected, weights, scores, findings, gateScore, text };
+}
+
+function rewriteMove(layer) {
+  let move = '';
+  if (layer === 'Sales 101') move = 'add a specific numeric anchor + named stakes + a clear next step.';
+  else if (layer === 'Jung') move = 'name the archetypal voice you\'re speaking from and surface the shadow before they do.';
+  else if (layer === 'Freud') move = 'puncture one rationalization · name what they actually want underneath the story.';
+  else if (layer === 'SEO') move = 'add H1/H2 structure with the primary keyword and 2-3 semantic neighbours.';
+  else if (layer === 'AI-SEO') move = 'add a list or table, an attributable claim ("according to X"), and recency signals.';
+  else if (layer === 'Platform') move = 'fit the platform native conventions (length, line breaks, hook position).';
+  return move;
+}
+
+// The rewrite priorities: the three weakest weighted layers that are failing or weak, with the move for each.
+function rewritePriorities(r) {
+  const failing = r.findings.filter(f => f.verdict === 'bad' || f.verdict === 'warn').slice(0, 3);
+  if (failing.length === 0) return null;
+  return {
+    layersClear: Object.values(r.scores).filter(s => s.score >= 60).length,
+    priorities: failing.map(f => ({ layer: f.layer, weight: f.weight, move: rewriteMove(f.layer) }))
+  };
+}
+/* ==== KERNEL:END ==== */
+
+const PRIME = 251;
+const SEED = 'v20.1';
+
+/* ── INPUT STATS ──────────────────────────────────────────────────── */
+
+function updateStats() {
+  const t = document.getElementById('copy-input').value;
+  const words = (t.trim().match(/\S+/g) || []).length;
+  const sentences = (t.match(/[.!?]+/g) || []).length || (t.trim() ? 1 : 0);
+  const chars = t.length;
+  const read = Math.max(1, Math.round(words / 3.5)); // ~210 wpm
+  document.getElementById('stat-words').textContent = words;
+  document.getElementById('stat-chars').textContent = chars;
+  document.getElementById('stat-sent').textContent = sentences;
+  document.getElementById('stat-read').textContent = read;
+}
+document.getElementById('copy-input').addEventListener('input', updateStats);
+
+function runGate(deepMode) {
+  const text = document.getElementById('copy-input').value.trim();
+  if (text.length < 30) { alert('Paste at least 30 characters of copy to read.'); return; }
+  const r = gate(text, document.getElementById('task-type').value, document.getElementById('audience-arch').value);
+  renderResult(r);
+
+  if (deepMode) {
+    aiDeepRead(text, r.task, r.audience, r.scores, r.findings).catch(e => alert('AI deep read failed: ' + e.message));
+  }
+}
+
 /* ── RENDER  ──────────────────────────────────────────────────────── */
 
 function renderResult(r) {
@@ -1067,20 +1097,13 @@ function renderResult(r) {
 }
 
 function generateRewriteAdvice(r) {
-  const failing = r.findings.filter(f => f.verdict === 'bad' || f.verdict === 'warn').slice(0, 3);
-  if (failing.length === 0) return null;
+  const p = rewritePriorities(r);
+  if (!p) return null;
   const lines = [];
-  lines.push(`<strong>This copy clears ${Object.values(r.scores).filter(s => s.score >= 60).length} of 6 layers above the working-signal line.</strong> The rewrite priorities — in order of weighted impact — are:`);
+  lines.push(`<strong>This copy clears ${p.layersClear} of 6 layers above the working-signal line.</strong> The rewrite priorities — in order of weighted impact — are:`);
   lines.push('<ol style="margin:12px 0 0 20px; padding:0;">');
-  for (const f of failing) {
-    let move = '';
-    if (f.layer === 'Sales 101') move = 'add a specific numeric anchor + named stakes + a clear next step.';
-    else if (f.layer === 'Jung') move = 'name the archetypal voice you\'re speaking from and surface the shadow before they do.';
-    else if (f.layer === 'Freud') move = 'puncture one rationalization · name what they actually want underneath the story.';
-    else if (f.layer === 'SEO') move = 'add H1/H2 structure with the primary keyword and 2-3 semantic neighbours.';
-    else if (f.layer === 'AI-SEO') move = 'add a list or table, an attributable claim ("according to X"), and recency signals.';
-    else if (f.layer === 'Platform') move = 'fit the platform native conventions (length, line breaks, hook position).';
-    lines.push(`<li style="margin-bottom:8px;"><strong>${f.layer}</strong> (weight ${f.weight}%) — ${move}</li>`);
+  for (const f of p.priorities) {
+    lines.push(`<li style="margin-bottom:8px;"><strong>${f.layer}</strong> (weight ${f.weight}%) — ${f.move}</li>`);
   }
   lines.push('</ol>');
   return lines.join('');

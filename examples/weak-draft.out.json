@@ -1,0 +1,156 @@
+{
+  "exitCode": 0,
+  "report": {
+    "tool": "copy-gate",
+    "version": "1.0.0",
+    "task": "sales-page",
+    "audience": "caregiver",
+    "detectedAudience": "caregiver",
+    "gateScore": 7,
+    "weights": {
+      "jung": 20,
+      "freud": 15,
+      "sales": 50,
+      "seo": 5,
+      "aiseo": 5,
+      "platform": 5
+    },
+    "scores": {
+      "jung": {
+        "score": 15,
+        "notes": [
+          "◔ Light caregiver archetype presence (1 signal)",
+          "◔ Surface only — doesn't name what they're avoiding"
+        ]
+      },
+      "freud": {
+        "score": 15,
+        "notes": [
+          "◔ One id-level cue — could go deeper"
+        ]
+      },
+      "sales": {
+        "score": 0,
+        "notes": [
+          "✗ No hook in the first sentence · re-write opener",
+          "✗ No numeric specificity · adds friction to belief",
+          "◔ No stakes named — reader has no urgency",
+          "✗ No proof — every claim survives without backing",
+          "✗ No clear CTA · sales-class copy needs a next step"
+        ]
+      },
+      "seo": {
+        "score": 0,
+        "notes": [
+          "◔ No clear keyword cluster — search engines can't place the page"
+        ]
+      },
+      "aiseo": {
+        "score": 5,
+        "notes": [
+          "✗ No lists or tables · LLMs will struggle to cite extractable facts",
+          "◔ No \"according to X\" attributions — LLMs prefer cited claims",
+          "◔ Few named entities — LLMs surface entity-rich pages first",
+          "✓ High lexical diversity — not stuffed"
+        ]
+      },
+      "platform": {
+        "score": 35,
+        "notes": [
+          "✗ 5 jargon words (\"synergy\", \"leverage\", \"disrupt\"…)"
+        ]
+      }
+    },
+    "findings": [
+      {
+        "layer": "Sales 101",
+        "verdict": "bad",
+        "headline": "FAILS · don't ship",
+        "score": 0,
+        "weight": 50,
+        "notes": [
+          "✗ No hook in the first sentence · re-write opener",
+          "✗ No numeric specificity · adds friction to belief",
+          "◔ No stakes named — reader has no urgency",
+          "✗ No proof — every claim survives without backing"
+        ]
+      },
+      {
+        "layer": "Jung",
+        "verdict": "bad",
+        "headline": "FAILS · don't ship",
+        "score": 15,
+        "weight": 20,
+        "notes": [
+          "◔ Light caregiver archetype presence (1 signal)",
+          "◔ Surface only — doesn't name what they're avoiding"
+        ]
+      },
+      {
+        "layer": "Freud",
+        "verdict": "bad",
+        "headline": "FAILS · don't ship",
+        "score": 15,
+        "weight": 15,
+        "notes": [
+          "◔ One id-level cue — could go deeper"
+        ]
+      },
+      {
+        "layer": "SEO",
+        "verdict": "bad",
+        "headline": "FAILS · don't ship",
+        "score": 0,
+        "weight": 5,
+        "notes": [
+          "◔ No clear keyword cluster — search engines can't place the page"
+        ]
+      },
+      {
+        "layer": "AI-SEO",
+        "verdict": "bad",
+        "headline": "FAILS · don't ship",
+        "score": 5,
+        "weight": 5,
+        "notes": [
+          "✗ No lists or tables · LLMs will struggle to cite extractable facts",
+          "◔ No \"according to X\" attributions — LLMs prefer cited claims",
+          "◔ Few named entities — LLMs surface entity-rich pages first",
+          "✓ High lexical diversity — not stuffed"
+        ]
+      },
+      {
+        "layer": "Platform",
+        "verdict": "warn",
+        "headline": "WEAK · needs rewrite",
+        "score": 35,
+        "weight": 5,
+        "notes": [
+          "✗ 5 jargon words (\"synergy\", \"leverage\", \"disrupt\"…)"
+        ]
+      }
+    ],
+    "rewrite": {
+      "layersClear": 0,
+      "priorities": [
+        {
+          "layer": "Sales 101",
+          "weight": 50,
+          "move": "add a specific numeric anchor + named stakes + a clear next step."
+        },
+        {
+          "layer": "Jung",
+          "weight": 20,
+          "move": "name the archetypal voice you're speaking from and surface the shadow before they do."
+        },
+        {
+          "layer": "Freud",
+          "weight": 15,
+          "move": "puncture one rationalization · name what they actually want underneath the story."
+        }
+      ]
+    },
+    "inputSha256": "4dd5d70fbb23211d565210f1c89fa59b85ea048c50d47a1f49965584c3f8521b",
+    "resultSha256": "696f32c95bd6c60c14a71a68274d26360a114b566f0b6f74a034114787eece19"
+  }
+}

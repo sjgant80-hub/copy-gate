@@ -59,9 +59,8 @@ Open the file from `file://` and it works. That's the test.
 
 - **Sovereign:** single HTML file · vanilla JS · works from `file://`
 - **Storage:** IndexedDB (saved readings) · localStorage (API key) · no server
-- **Mesh:** `BroadcastChannel('fall-signal')` · prime 251
+- **Mesh:** `BroadcastChannel('fall-signal')`: open tabs of the tool can find each other
 - **AI mode (optional):** BYO Anthropic API key · stays in localStorage · calls Claude directly from your browser (`anthropic-dangerous-direct-browser-access: true`)
-- **Sealed:** `◊·κ=1` · part of the [v20.1 cosmology](https://raw.githubusercontent.com/sjgant80-hub/fall-registry/main/seed-manifest.json)
 
 ### Extending
 
@@ -75,6 +74,25 @@ MIT. Use it commercially. Fork it. Rebrand it. Ship it inside your own tool. The
 
 ## Provenance
 
-Built as part of the sovereign-software estate at [ai-nativesolutions.com](https://www.ai-nativesolutions.com). The framework is the standing order for every piece of copy that leaves the estate. The tool makes it executable for anyone.
+Built by AI Native Solutions. The six-layer framework is the check every piece of our own copy goes through; the tool makes it executable for anyone.
 
-`◊·κ=1 · phi is home · prime 251`
+## Use it from an agent
+
+`SKILL.md` makes this repository an agent skill in the open SKILL.md format (Claude Code, Codex CLI, Cursor and
+others read it). The agent runs `scripts/copy-gate.mjs`, one Node.js 20+ file with no dependencies and no network,
+and gets the same six scores and gate score as this page. The page's optional AI deep read is not part of it.
+
+    node scripts/copy-gate.mjs examples/linkedin-sample.json
+
+`node make-zip.mjs` checks the package against Agensi's published rules and builds `dist/copy-gate.zip`, the upload
+for the Agensi skill marketplace. CI builds the same ZIP on every push and prints its SHA-256.
+
+## Proof
+
+- **One source of truth:** the KERNEL block of `index.html` is the six-layer engine. `node build.mjs` copies it
+  byte-for-byte into `kernel.mjs` and into the skill script; CI fails if the three ever differ, or if
+  `copy-gate.html` stops being the same file as `index.html`.
+- **Tests:** `npm test` runs the engine tests (every threshold at its boundary) and runs the skill script alone in an
+  empty folder, the way Agensi runs it, against the expected outputs in `examples/`.
+- **Mutation gate:** witness v0.6 checks every single-operator mutant of `kernel.mjs`; the receipt is
+  `receipts/witness.json`, re-checked by CI on every push: https://github.com/sjgant80-hub/copy-gate/actions/workflows/ci.yml

@@ -1,0 +1,8 @@
+[
+  {
+    "line": 433,
+    "mutation": "> → >=",
+    "snippet": "if (weights[k] > 0) {",
+    "reason": "Equivalent, and checked rather than argued. The mutant also enters the branch for a layer whose weight is 0, where it adds score * 0 = 0 to the weighted sum and 0 to the total: neither sum changes, so the gate score is the same. Every weight in WEIGHTS is a non-negative integer and every task has at least one positive weight. Verified by differential run: 200,000 random sets of six layer scores (0-100) across all 10 tasks, gate score computed with > 0 and with >= 0: identical every time."
+  }
+]

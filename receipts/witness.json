@@ -1,0 +1,31 @@
+{
+ "kind": "copy-gate.witness",
+ "v": 1,
+ "witness": {
+  "tag": "v0.6",
+  "commit": "f04fe3047e3d49b98c67713befd5b77182afa0d4",
+  "sha256": "9918297aa5f8fc4e1d26d9e6b25226f56102fdc04f0c634155bfcba1c086ef48"
+ },
+ "kernel": "kernel.mjs",
+ "kernelSha256": "7b2e50f4b46fb3c2e9e3ed358e3f5b6d3abad7d60eba7923b1cc315589bd6c22",
+ "tests": "node --test kernel.test.mjs",
+ "testsSha256": "8093fa38c45db8db068651956265d2dcb0fd54e72ab5ea29dfd6017badab40d9",
+ "node": "v25.7.0",
+ "platform": "win32",
+ "total": 96,
+ "killed": 95,
+ "survived": [],
+ "ignored": [
+  {
+   "line": 433,
+   "mutation": "> → >=",
+   "snippet": "if (weights[k] > 0) {",
+   "reason": "Equivalent, and checked rather than argued. The mutant also enters the branch for a layer whose weight is 0, where it adds score * 0 = 0 to the weighted sum and 0 to the total: neither sum changes, so the gate score is the same. Every weight in WEIGHTS is a non-negative integer and every task has at least one positive weight. Verified by differential run: 200,000 random sets of six layer scores (0-100) across all 10 tasks, gate score computed with > 0 and with >= 0: identical every time."
+  }
+ ],
+ "capped": false,
+ "timeoutMs": 60000,
+ "clean": true,
+ "seconds": 87,
+ "rerun": "git clone https://github.com/sjgant80-hub/witness && git -C witness checkout v0.6 && node gate.mjs --witness witness/witness.mjs"
+}

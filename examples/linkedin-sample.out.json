@@ -1,0 +1,150 @@
+{
+  "exitCode": 0,
+  "report": {
+    "tool": "copy-gate",
+    "version": "1.0.0",
+    "task": "linkedin",
+    "audience": "outlaw",
+    "detectedAudience": "ruler",
+    "gateScore": 48,
+    "weights": {
+      "jung": 30,
+      "freud": 20,
+      "sales": 25,
+      "seo": 0,
+      "aiseo": 5,
+      "platform": 25
+    },
+    "scores": {
+      "jung": {
+        "score": 30,
+        "notes": [
+          "✗ No clear outlaw archetype voice — copy reads as generic",
+          "◔ Surface only — doesn't name what they're avoiding",
+          "✓ At least two sentences carrying real weight (length-as-depth)",
+          "✓ Uses verbs of feeling, not adjectives — body-level resonance"
+        ]
+      },
+      "freud": {
+        "score": 20,
+        "notes": [
+          "✗ Stays in ego — never punctures the rationalization",
+          "✓ Pulls back the surface explanation"
+        ]
+      },
+      "sales": {
+        "score": 75,
+        "notes": [
+          "✓ Opens with a hook pattern",
+          "✓ Specific (10 numeric anchors)",
+          "✓ Named entities cited (people / brands)",
+          "◔ No stakes named — reader has no urgency",
+          "✓ Proof element present",
+          "✓ CTA detected"
+        ]
+      },
+      "seo": {
+        "score": 25,
+        "notes": [
+          "◔ No clear keyword cluster — search engines can't place the page",
+          "✓ Opener works as meta description (≤160 chars)"
+        ]
+      },
+      "aiseo": {
+        "score": 50,
+        "notes": [
+          "✓ List structure (3 items) — LLMs extract these",
+          "◔ No \"according to X\" attributions — LLMs prefer cited claims",
+          "✓ Entity density (17 named entities)",
+          "✓ Recency signals present",
+          "✓ High lexical diversity — not stuffed"
+        ]
+      },
+      "platform": {
+        "score": 65,
+        "notes": [
+          "✓ Plenty of line breaks · scan-friendly"
+        ]
+      }
+    },
+    "findings": [
+      {
+        "layer": "Jung",
+        "verdict": "warn",
+        "headline": "WEAK · needs rewrite",
+        "score": 30,
+        "weight": 30,
+        "notes": [
+          "✗ No clear outlaw archetype voice — copy reads as generic",
+          "◔ Surface only — doesn't name what they're avoiding",
+          "✓ At least two sentences carrying real weight (length-as-depth)",
+          "✓ Uses verbs of feeling, not adjectives — body-level resonance"
+        ]
+      },
+      {
+        "layer": "Freud",
+        "verdict": "bad",
+        "headline": "FAILS · don't ship",
+        "score": 20,
+        "weight": 20,
+        "notes": [
+          "✗ Stays in ego — never punctures the rationalization",
+          "✓ Pulls back the surface explanation"
+        ]
+      },
+      {
+        "layer": "Platform",
+        "verdict": "ok",
+        "headline": "WORKS · could go deeper",
+        "score": 65,
+        "weight": 25,
+        "notes": [
+          "✓ Plenty of line breaks · scan-friendly"
+        ]
+      },
+      {
+        "layer": "Sales 101",
+        "verdict": "good",
+        "headline": "CLEAR · ships",
+        "score": 75,
+        "weight": 25,
+        "notes": [
+          "✓ Opens with a hook pattern",
+          "✓ Specific (10 numeric anchors)",
+          "✓ Named entities cited (people / brands)",
+          "◔ No stakes named — reader has no urgency"
+        ]
+      },
+      {
+        "layer": "AI-SEO",
+        "verdict": "ok",
+        "headline": "WORKS · could go deeper",
+        "score": 50,
+        "weight": 5,
+        "notes": [
+          "✓ List structure (3 items) — LLMs extract these",
+          "◔ No \"according to X\" attributions — LLMs prefer cited claims",
+          "✓ Entity density (17 named entities)",
+          "✓ Recency signals present"
+        ]
+      }
+    ],
+    "rewrite": {
+      "layersClear": 2,
+      "priorities": [
+        {
+          "layer": "Jung",
+          "weight": 30,
+          "move": "name the archetypal voice you're speaking from and surface the shadow before they do."
+        },
+        {
+          "layer": "Freud",
+          "weight": 20,
+          "move": "puncture one rationalization · name what they actually want underneath the story."
+        }
+      ]
+    },
+    "inputSha256": "77b00f2ddd172a4efc9ba839d153c4c7fe871489fa899dc9daed4f3f570d58fb",
+    "resultSha256": "d1f65e6849a82f44aa89678b804a45a951313b5c74fe196850ddeebe04846ece"
+  }
+}
