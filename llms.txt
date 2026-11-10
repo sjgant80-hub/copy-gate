@@ -1,0 +1,20 @@
+# Copy Gate
+
+> Copy Gate reads a piece of copy through six layers (Jung, Freud, Sales 101, SEO, AI-SEO and platform fit), weighted for the job the copy has to do, and returns a score per layer, a weighted gate score, the findings worst-first and the rewrite priorities. Deterministic: the same copy gives the same result and the same SHA-256 on any machine, with no AI model judging it. Runs in the browser; nothing is sent anywhere. MIT, supplied by AI Native Solutions.
+
+## Canonical URL
+
+https://sjgant80-hub.github.io/copy-gate/
+
+## What is on the page
+
+- The tool: paste copy, pick the job it has to do, read the six layer scores, the gate score, the findings and the rewrite priorities.
+
+## For agents
+
+- The same engine ships as a one-file Node.js script, `scripts/copy-gate.mjs`, described in SKILL.md (an agent skill): https://github.com/sjgant80-hub/copy-gate/blob/main/SKILL.md
+- The engine is mutation-gated with witness v0.6 in CI; the receipt is receipts/witness.json in the repository.
+
+## Source
+
+https://github.com/sjgant80-hub/copy-gate (MIT)
